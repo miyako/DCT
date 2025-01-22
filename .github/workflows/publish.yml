@@ -21,7 +21,7 @@ on:
           required: true
 
 env: 
-  project_path: curl/Project/curl.4DProject
+  project_path: DCT/Project/DCT.4DProject
   
 jobs:
 
