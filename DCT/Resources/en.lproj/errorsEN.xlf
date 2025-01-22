@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0" xmlns:d4="http://www.4d.com">
+    <file datatype="x-STR#" original="x-undefined" source-language="en-US" target-language="en">
+		<body>
+            <group resname="DCT_ERR_GENERAL">
+                <trans-unit id="1" resname="ERR_DCT _1">
+                    <source>Data Change Tracking is not enabled for {target}.</source>
+                    <target>Data Change Tracking is not enabled for {target}.</target>
+                </trans-unit>
+                <trans-unit id="2" resname="ERR_DCT _2">
+                    <source>Not connected to remote data store.</source>
+                    <target>Not connected to remote data store.</target>
+                </trans-unit>
+                <trans-unit id="3" resname="ERR_DCT _3">
+                    <source>Invalid {target} name &quot;{name}&quot;.</source>
+                    <target>Invalid {target} name &quot;{name}&quot;.</target>
+                </trans-unit>
+			</group>
+		</body>
+	</file>
+</xliff>

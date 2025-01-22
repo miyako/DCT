@@ -1,0 +1,42 @@
+{
+	"_method_": {},
+	"cs.DCT": {
+		"DCT": {
+			"new()": {
+				"Syntax": "**.new**()",
+				"Params": [],
+				"Summary": ""
+			}
+		}
+	},
+	"DCT": {
+		"get version()": {
+			"Syntax": "**.get version**() : Text",
+			"Params": [
+				[
+					"",
+					"Text",
+					"<-"
+				]
+			],
+			"Summary": ""
+		},
+		"get features()": {
+			"Syntax": "**.get features**() : Collection",
+			"Params": [
+				[
+					"",
+					"Collection",
+					"<-"
+				]
+			],
+			"Summary": ""
+		},
+		"features": {
+			"Syntax": "features : Collection"
+		},
+		"version": {
+			"Syntax": "version : Text"
+		}
+	}
+}

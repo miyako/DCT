@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?><preferences stamp="3">
+	<com.4d>
+		<compiler>
+			<options error_file="true" symbol_file="true" syntax_file="true" target="all"/>
+			<typage default_for_button="2" default_for_numeric="1"/>
+		</compiler>
+		<general component_classStore_name="DCT"/>
+		<database>
+			<misc non_blocking_printing="false" split_catalog="true"/>
+		</database>
+	</com.4d>
+</preferences>
