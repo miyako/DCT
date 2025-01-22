@@ -5,3 +5,16 @@
 
 # DCT
 Data Change Tracking
+
+## dependencies.json
+
+```json
+{
+	"dependencies": {
+		"DCT": {
+			"github": "miyako/DCT",
+			"version": "*"
+		}
+	}
+}
+```
