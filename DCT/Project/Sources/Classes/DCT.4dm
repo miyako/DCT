@@ -42,13 +42,6 @@ Class constructor
 	
 Function connect($connectionInfo : Object; $name : Text) : Boolean
 	
-	If (Not:C34(This:C1470.isDataChangeTrackingAvailable)) || (Not:C34(This:C1470.isDataChangeTrackingEnabled))
-		If (This:C1470.isThrowAvailable)
-			throw:C1805({componentSignature: "DCT"; errCode: 1; target: "the database"})
-		End if 
-		return False:C215
-	End if 
-	
 	If ($name="")  //name 
 		$name:=$connectionInfo.hostname
 	End if 
@@ -97,74 +90,78 @@ the files are create locally, not on the server
 	
 	//1: local ---> remote
 	
-	var $dataClass : 4D:C1709.DataClass
-	var $dataClassName; $attributeName : Text
-	var $remoteDataClass; $localDataClass : 4D:C1709.DataClass
-	var $remoteEntity; $localEntity : 4D:C1709.Entity
-	var $entitySelection : 4D:C1709.EntitySelection
-	For each ($dataClass; $dataClasses)
-		$dataClassName:=$dataClass.getInfo().name
+	If (This:C1470.isDataChangeTrackingAvailable) && (This:C1470.isDataChangeTrackingEnabled)
 		
-		$remoteDataClass:=$ds[$dataClassName]
-		If (Not:C34(OB Instance of:C1731($remoteDataClass; 4D:C1709.DataClass)))
-			If (This:C1470.isThrowAvailable)
-				throw:C1805({componentSignature: "DCT"; errCode: 3; target: "remote dataclass"; name: $dataClassName; deferred: True:C214})
+		var $dataClass : 4D:C1709.DataClass
+		var $dataClassName; $attributeName : Text
+		var $remoteDataClass; $localDataClass : 4D:C1709.DataClass
+		var $remoteEntity; $localEntity : 4D:C1709.Entity
+		var $entitySelection : 4D:C1709.EntitySelection
+		For each ($dataClass; $dataClasses)
+			$dataClassName:=$dataClass.getInfo().name
+			
+			$remoteDataClass:=$ds[$dataClassName]
+			If (Not:C34(OB Instance of:C1731($remoteDataClass; 4D:C1709.DataClass)))
+				If (This:C1470.isThrowAvailable)
+					throw:C1805({componentSignature: "DCT"; errCode: 3; target: "remote dataclass"; name: $dataClassName; deferred: True:C214})
+				End if 
+				continue
 			End if 
-			continue
-		End if 
-		
-		$localDataClass:=ds:C1482[$dataClassName]
-		If (Not:C34(OB Instance of:C1731($localDataClass; 4D:C1709.DataClass)))
-			If (This:C1470.isThrowAvailable)
-				throw:C1805({componentSignature: "DCT"; errCode: 3; target: "local dataclass"; name: $dataClassName; deferred: True:C214})
+			
+			$localDataClass:=ds:C1482[$dataClassName]
+			If (Not:C34(OB Instance of:C1731($localDataClass; 4D:C1709.DataClass)))
+				If (This:C1470.isThrowAvailable)
+					throw:C1805({componentSignature: "DCT"; errCode: 3; target: "local dataclass"; name: $dataClassName; deferred: True:C214})
+				End if 
+				continue
 			End if 
-			continue
-		End if 
-		
-		Case of 
-			: ($dataClassName="__DeletedRecords")
-				$entitySelection:=ds:C1482["__DeletedRecords"].query("__Stamp >= :1"; This:C1470.localStamp)
-				For each ($localEntity; $entitySelection)
-					$remoteEntity:=$ds[$localEntity.__TableName].get($localEntity.__PrimaryKey)
-					If ($remoteEntity#Null:C1517)
-						$status:=$remoteEntity.drop()
-						If (Not:C34($status.success))
-							$remoteLogFile.writeLine(JSON Stringify:C1217($status; *))
-						Else 
-							
-							//no need to care about deletion bouncing back, it no longer exists locally
-							
-						End if 
-					End if 
-				End for each 
-			Else 
-				$entitySelection:=$localDataClass.query("__GlobalStamp >= :1"; This:C1470.localStamp)
-				For each ($localEntity; $entitySelection)
-					$remoteEntity:=$remoteDataClass.get($localEntity.getKey())
-					If ($remoteEntity=Null:C1517)
-						$remoteEntity:=$remoteDataClass.new()
-					End if 
-					For each ($attributeName; $localEntity)
-						If ($dataClassName#"__GlobalStamp") && ($localDataClass[$attributeName].kind="storage") && ($attributeName#"__GlobalStamp")
-							$remoteEntity[$attributeName]:=$localEntity[$attributeName]
+			
+			Case of 
+				: ($dataClassName="__DeletedRecords")
+					$entitySelection:=ds:C1482["__DeletedRecords"].query("__Stamp >= :1"; This:C1470.localStamp)
+					For each ($localEntity; $entitySelection)
+						$remoteEntity:=$ds[$localEntity.__TableName].get($localEntity.__PrimaryKey)
+						If ($remoteEntity#Null:C1517)
+							$status:=$remoteEntity.drop()
+							If (Not:C34($status.success))
+								$remoteLogFile.writeLine(JSON Stringify:C1217($status; *))
+							Else 
+								
+								//no need to care about deletion bouncing back, it no longer exists locally
+								
+							End if 
 						End if 
 					End for each 
-					$status:=$remoteEntity.save(dk auto merge:K85:24)
-					If (Not:C34($status.success))
-						$remoteLogFile.writeLine(JSON Stringify:C1217($status; *))
-						$remoteLogFile.writeLine(JSON Stringify:C1217($localEntity.toObject(); *))
-						
-						This:C1470._touchLocalEntity($localEntity)
-						
-					Else 
-						
-						//increment the stamp to avoid the operation bouncing back
-						$remotestamp:=$remoteEntity.__GlobalStamp+1
-						
-					End if 
-				End for each 
-		End case 
-	End for each 
+				Else 
+					$entitySelection:=$localDataClass.query("__GlobalStamp >= :1"; This:C1470.localStamp)
+					For each ($localEntity; $entitySelection)
+						$remoteEntity:=$remoteDataClass.get($localEntity.getKey())
+						If ($remoteEntity=Null:C1517)
+							$remoteEntity:=$remoteDataClass.new()
+						End if 
+						For each ($attributeName; $localEntity)
+							If ($dataClassName#"__GlobalStamp") && ($localDataClass[$attributeName].kind="storage") && ($attributeName#"__GlobalStamp")
+								$remoteEntity[$attributeName]:=$localEntity[$attributeName]
+							End if 
+						End for each 
+						$status:=$remoteEntity.save(dk auto merge:K85:24)
+						If (Not:C34($status.success))
+							$remoteLogFile.writeLine(JSON Stringify:C1217($status; *))
+							$remoteLogFile.writeLine(JSON Stringify:C1217($localEntity.toObject(); *))
+							
+							This:C1470._touchLocalEntity($localEntity)
+							
+						Else 
+							
+							//increment the stamp to avoid the operation bouncing back
+							$remotestamp:=$remoteEntity.__GlobalStamp+1
+							
+						End if 
+					End for each 
+			End case 
+		End for each 
+		
+	End if 
 	
 	//2: remote ---> local
 	
