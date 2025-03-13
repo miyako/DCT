@@ -13,7 +13,7 @@ Data Change Tracking
 	"dependencies": {
 		"DCT": {
 			"github": "miyako/DCT",
-			"version": "*"
+			"version": "latest"
 		}
 	}
 }
