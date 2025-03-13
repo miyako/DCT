@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE base SYSTEM "http://www.4d.com/dtd/2007/base.dtd" >
-<base name="DCT" uuid="2AAF059D45694A0CB9F3AD1A0945B1E6" collation_locale="en-us">
+<base name="DCT" uuid="2AAF059D45694A0CB9F3AD1A0945B1E6" collation_locale="en-gb">
 	<schema name="DEFAULT_SCHEMA"/>
 	<base_extra>
 		<journal_file journal_file_enabled="false"/>

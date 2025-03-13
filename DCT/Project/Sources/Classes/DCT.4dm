@@ -123,7 +123,7 @@ the files are create locally, not on the server
 		
 		Case of 
 			: ($dataClassName="__DeletedRecords")
-				$entitySelection:=ds:C1482.__DeletedRecords.query("__Stamp >= :1"; This:C1470.localStamp)
+				$entitySelection:=ds:C1482["__DeletedRecords"].query("__Stamp >= :1"; This:C1470.localStamp)
 				For each ($localEntity; $entitySelection)
 					$remoteEntity:=$ds[$localEntity.__TableName].get($localEntity.__PrimaryKey)
 					If ($remoteEntity#Null:C1517)
