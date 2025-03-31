@@ -136,12 +136,12 @@ the files are create locally, not on the server
 						$remoteEntity:=$ds[$localEntity.__TableName].get($localEntity.__PrimaryKey)
 						If ($remoteEntity#Null:C1517)
 							$status:=$remoteEntity.drop()
-							If (Not:C34($status.success)) && ($remoteLogFile)
-								$remoteLogFile.writeLine(JSON Stringify:C1217($status; *))
+							If (Not:C34($status.success))
+								If ($remoteLogFile#Null:C1517)
+									$remoteLogFile.writeLine(JSON Stringify:C1217($status; *))
+								End if 
 							Else 
-								
 								//no need to care about deletion bouncing back, it no longer exists locally
-								
 							End if 
 						End if 
 					End for each 
@@ -206,7 +206,9 @@ the files are create locally, not on the server
 					If ($localEntity#Null:C1517)
 						$status:=$localEntity.drop()
 						If (Not:C34($status.success))
-							$localLogFile.writeLine(JSON Stringify:C1217($status; *))
+							If ($localLogFile#Null:C1517)
+								$localLogFile.writeLine(JSON Stringify:C1217($status; *))
+							End if 
 						Else 
 							//no need to care about deletion bouncing back, it no longer exists locally
 						End if 
