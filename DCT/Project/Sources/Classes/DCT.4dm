@@ -9,6 +9,19 @@ property ds : 4D:C1709.DataStoreImplementation  //the remote ds
 property localStamp : Real
 property remoteStamp : Real
 
+property _major : Integer
+property _minor : Integer
+property _patch : Integer
+property _name : Text
+property _ds : 4D:C1709.DataStoreImplementation
+property _isRemoteGlobalStampAvailable : Boolean
+property _localStamp : Real
+property _remoteStamp : Real
+property _isThrowAvailable : Boolean
+property _isDataChangeTrackingEnabled : Boolean
+property _isDataChangeTrackingAvailable : Boolean
+property _dataClasses : Collection
+
 Class constructor
 	
 	This:C1470._major:=0
