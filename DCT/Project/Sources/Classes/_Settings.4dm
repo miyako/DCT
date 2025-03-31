@@ -29,7 +29,11 @@ Function openLogFileForDataStore($name : Text; $isRemote : Boolean) : 4D:C1709.F
 	var $file : 4D:C1709.File
 	$file:=This:C1470.logFileForDataStore($name; $isRemote)
 	
-	return $file.open("append")
+	var $h : 4D:C1709.FileHandle
+	$h:=$file.open("append")
+	ON ERR CALL:C155("")
+	
+	return $h
 	
 Function getStampForDataStore($name : Text; $isRemote : Boolean) : Real
 	

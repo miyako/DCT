@@ -123,7 +123,7 @@ the files are create locally, not on the server
 						$remoteEntity:=$ds[$localEntity.__TableName].get($localEntity.__PrimaryKey)
 						If ($remoteEntity#Null:C1517)
 							$status:=$remoteEntity.drop()
-							If (Not:C34($status.success))
+							If (Not:C34($status.success)) && ($remoteLogFile)
 								$remoteLogFile.writeLine(JSON Stringify:C1217($status; *))
 							Else 
 								
@@ -145,7 +145,7 @@ the files are create locally, not on the server
 							End if 
 						End for each 
 						$status:=$remoteEntity.save(dk auto merge:K85:24)
-						If (Not:C34($status.success))
+						If (Not:C34($status.success)) && ($remoteLogFile)
 							$remoteLogFile.writeLine(JSON Stringify:C1217($status; *))
 							$remoteLogFile.writeLine(JSON Stringify:C1217($localEntity.toObject(); *))
 							
@@ -154,7 +154,7 @@ the files are create locally, not on the server
 						Else 
 							
 							//increment the stamp to avoid the operation bouncing back
-							$remotestamp:=$remoteEntity.__GlobalStamp+1
+							$remotestamp:=Num:C11($remoteEntity.__GlobalStamp)+1
 							
 						End if 
 					End for each 
@@ -221,7 +221,7 @@ the files are create locally, not on the server
 					Else 
 						
 						//increment the stamp to avoid the operation bouncing back
-						$localstamp:=$localEntity.__GlobalStamp+1
+						$localstamp:=Num:C11($localEntity.__GlobalStamp)+1
 						
 					End if 
 				End for each 
