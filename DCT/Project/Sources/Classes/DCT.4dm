@@ -167,7 +167,9 @@ the files are create locally, not on the server
 						Else 
 							
 							//increment the stamp to avoid the operation bouncing back
-							$remotestamp:=Num:C11($remoteEntity.__GlobalStamp)+1
+							If ($remoteEntity.__GlobalStamp#Null:C1517)
+								$remotestamp:=$remoteEntity.__GlobalStamp+1
+							End if 
 							
 						End if 
 					End for each 
@@ -234,7 +236,9 @@ the files are create locally, not on the server
 					Else 
 						
 						//increment the stamp to avoid the operation bouncing back
-						$localstamp:=Num:C11($localEntity.__GlobalStamp)+1
+						If ($localEntity.__GlobalStamp#Null:C1517)
+							$localstamp:=$localEntity.__GlobalStamp+1
+						End if 
 						
 					End if 
 				End for each 
