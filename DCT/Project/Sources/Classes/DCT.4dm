@@ -15,8 +15,6 @@ property _patch : Integer
 property _name : Text
 property _ds : 4D:C1709.DataStoreImplementation
 property _isRemoteGlobalStampAvailable : Boolean
-property _localStamp : Real
-property _remoteStamp : Real
 property _isThrowAvailable : Boolean
 property _isDataChangeTrackingEnabled : Boolean
 property _isDataChangeTrackingAvailable : Boolean
@@ -77,7 +75,13 @@ Function connect($connectionInfo : Object; $name : Text) : Boolean
 	
 Function sync($dataClasses : Collection)
 	
-	This:C1470._updateStamps()
+	var $nextLocalStamp; $nextRemoteStamp : Real
+	$nextLocalStamp:=This:C1470.getLocalGlobalStamp()
+	$nextRemoteStamp:=This:C1470.getRemoteGlobalStamp()
+	
+	var $localStamp; $remoteStamp : Real
+	$localStamp:=This:C1470.localStamp
+	$remoteStamp:=This:C1470.remoteStamp
 	
 	//if none specified, sync all tables
 	If ($dataClasses=Null:C1517) || ($dataClasses.length=0)
@@ -90,13 +94,10 @@ the files are create locally, not on the server
 */
 	var $settings : cs:C1710._Settings
 	$settings:=cs:C1710._Settings.new()
+	
 	var $localLogFile; $remoteLogFile : 4D:C1709.FileHandle
 	$remoteLogFile:=$settings.openLogFileForDataStore(This:C1470.name; True:C214)
-	$localLogFile:=$settings.openLogFileForDataStore()
-	
-	var $localstamp; $remoteStamp : Real
-	$localstamp:=This:C1470.getLocalGlobalStamp()
-	$remoteStamp:=This:C1470.getRemoteGlobalStamp()
+	$localLogFile:=$settings.openLogFileForDataStore(This:C1470.name)
 	
 	var $ds : 4D:C1709.DataStoreImplementation
 	$ds:=This:C1470.ds
@@ -116,7 +117,7 @@ the files are create locally, not on the server
 			$remoteDataClass:=$ds[$dataClassName]
 			If (Not:C34(OB Instance of:C1731($remoteDataClass; 4D:C1709.DataClass)))
 				If (This:C1470.isThrowAvailable)
-					throw:C1805({componentSignature: "DCT"; errCode: 3; target: "remote dataclass"; name: $dataClassName; deferred: True:C214})
+					//:C1805({componentSignature: "DCT"; errCode: 3; target: "remote dataclass"; name: $dataClassName; deferred: True})
 				End if 
 				continue
 			End if 
@@ -124,14 +125,14 @@ the files are create locally, not on the server
 			$localDataClass:=ds:C1482[$dataClassName]
 			If (Not:C34(OB Instance of:C1731($localDataClass; 4D:C1709.DataClass)))
 				If (This:C1470.isThrowAvailable)
-					throw:C1805({componentSignature: "DCT"; errCode: 3; target: "local dataclass"; name: $dataClassName; deferred: True:C214})
+					//:C1805({componentSignature: "DCT"; errCode: 3; target: "local dataclass"; name: $dataClassName; deferred: True})
 				End if 
 				continue
 			End if 
 			
 			Case of 
 				: ($dataClassName="__DeletedRecords")
-					$entitySelection:=ds:C1482["__DeletedRecords"].query("__Stamp >= :1"; This:C1470.localStamp)
+					$entitySelection:=ds:C1482["__DeletedRecords"].query("__Stamp >= :1"; $localStamp)
 					For each ($localEntity; $entitySelection)
 						$remoteEntity:=$ds[$localEntity.__TableName].get($localEntity.__PrimaryKey)
 						If ($remoteEntity#Null:C1517)
@@ -146,14 +147,14 @@ the files are create locally, not on the server
 						End if 
 					End for each 
 				Else 
-					$entitySelection:=$localDataClass.query("__GlobalStamp >= :1"; This:C1470.localStamp)
+					$entitySelection:=$localDataClass.query("__GlobalStamp >= :1"; $localStamp)
 					For each ($localEntity; $entitySelection)
 						$remoteEntity:=$remoteDataClass.get($localEntity.getKey())
 						If ($remoteEntity=Null:C1517)
 							$remoteEntity:=$remoteDataClass.new()
 						End if 
 						For each ($attributeName; $localEntity)
-							If ($dataClassName#"__GlobalStamp") && ($localDataClass[$attributeName].kind="storage") && ($attributeName#"__GlobalStamp")
+							If ($localDataClass[$attributeName].kind="storage") && ($attributeName#"__GlobalStamp")
 								$remoteEntity[$attributeName]:=$localEntity[$attributeName]
 							End if 
 						End for each 
@@ -168,7 +169,7 @@ the files are create locally, not on the server
 							
 							//increment the stamp to avoid the operation bouncing back
 							If ($remoteEntity.__GlobalStamp#Null:C1517)
-								$remotestamp:=$remoteEntity.__GlobalStamp+1
+								$nextRemoteStamp:=$remoteEntity.__GlobalStamp+1
 							End if 
 							
 						End if 
@@ -185,7 +186,7 @@ the files are create locally, not on the server
 		$remoteDataClass:=$ds[$dataClassName]
 		If (Not:C34(OB Instance of:C1731($remoteDataClass; 4D:C1709.DataClass)))
 			If (This:C1470.isThrowAvailable)
-				throw:C1805({componentSignature: "DCT"; errCode: 3; target: "remote dataclass"; name: $dataClassName; deferred: True:C214})
+				//:C1805({componentSignature: "DCT"; errCode: 3; target: "remote dataclass"; name: $dataClassName; deferred: True})
 			End if 
 			continue
 		End if 
@@ -193,14 +194,14 @@ the files are create locally, not on the server
 		$localDataClass:=ds:C1482[$dataClassName]
 		If (Not:C34(OB Instance of:C1731($localDataClass; 4D:C1709.DataClass)))
 			If (This:C1470.isThrowAvailable)
-				throw:C1805({componentSignature: "DCT"; errCode: 3; target: "local dataclass"; name: $dataClassName; deferred: True:C214})
+				//:C1805({componentSignature: "DCT"; errCode: 3; target: "local dataclass"; name: $dataClassName; deferred: True})
 			End if 
 			continue
 		End if 
 		
 		Case of 
 			: ($dataClassName="__DeletedRecords")
-				$entitySelection:=$ds.__DeletedRecords.query("__Stamp >= :1"; This:C1470.remoteStamp)
+				$entitySelection:=$ds.__DeletedRecords.query("__Stamp >= :1"; $remoteStamp)
 				For each ($remoteEntity; $entitySelection)
 					$localEntity:=ds:C1482[$remoteEntity.__TableName].get($remoteEntity.__PrimaryKey)
 					If ($localEntity#Null:C1517)
@@ -215,14 +216,14 @@ the files are create locally, not on the server
 					End if 
 				End for each 
 			Else 
-				$entitySelection:=$remoteDataClass.query("__GlobalStamp >= :1"; This:C1470.remoteStamp)
+				$entitySelection:=$remoteDataClass.query("__GlobalStamp >= :1"; $remoteStamp)
 				For each ($remoteEntity; $entitySelection)
 					$localEntity:=$localDataClass.get($remoteEntity.getKey())
 					If ($localEntity=Null:C1517)
 						$localEntity:=$localDataClass.new()
 					End if 
 					For each ($attributeName; $remoteEntity)
-						If ($dataClassName#"__GlobalStamp") && ($localDataClass[$attributeName].kind="storage") && ($attributeName#"__GlobalStamp")
+						If ($localDataClass[$attributeName].kind="storage") && ($attributeName#"__GlobalStamp")
 							$localEntity[$attributeName]:=$remoteEntity[$attributeName]
 						End if 
 					End for each 
@@ -237,7 +238,7 @@ the files are create locally, not on the server
 						
 						//increment the stamp to avoid the operation bouncing back
 						If ($localEntity.__GlobalStamp#Null:C1517)
-							$localstamp:=$localEntity.__GlobalStamp+1
+							$nextLocalStamp:=$localEntity.__GlobalStamp+1
 						End if 
 						
 					End if 
@@ -245,8 +246,8 @@ the files are create locally, not on the server
 		End case 
 	End for each 
 	
-	saveLocalGlobalStamp($localstamp)
-	saveRemoteGlobalStamp($remoteStamp; This:C1470.name)
+	saveLocalGlobalStamp($nextLocalStamp; This:C1470.name)
+	saveRemoteGlobalStamp($nextRemoteStamp; This:C1470.name)
 	
 	$localLogFile:=Null:C1517
 	$remoteLogFile:=Null:C1517
@@ -273,35 +274,6 @@ Function getRemoteGlobalStamp() : Real
 	
 	return -1
 	
-	//MARK: stamp functions (private)
-	
-Function _updateStamps()
-	
-	If (Not:C34(This:C1470.isDataChangeTrackingAvailable)) || (Not:C34(This:C1470.isDataChangeTrackingEnabled))
-		If (This:C1470.isThrowAvailable)
-			throw:C1805({componentSignature: "DCT"; errCode: 1; target: "the database"; deferred: True:C214})
-		End if 
-		return 
-	End if 
-	
-	This:C1470._localStamp:=This:C1470.getLocalGlobalStamp()
-	This:C1470._remoteStamp:=This:C1470.getRemoteGlobalStamp()
-	
-	var $localStamp; $remoteStamp : Real
-	$localStamp:=loadLocalGlobalStamp()
-	$remoteStamp:=loadRemoteGlobalStamp(This:C1470.name)
-	
-	If ($localStamp=-1) && (This:C1470.localStamp#0)
-		saveLocalGlobalStamp(This:C1470.localStamp-1)
-	End if 
-	
-	If ($remoteStamp=-1) && (This:C1470.remoteStamp#0)
-		saveRemoteGlobalStamp(This:C1470.remoteStamp-1; This:C1470.name)
-	End if 
-	
-	This:C1470._localStamp:=loadLocalGlobalStamp()
-	This:C1470._remoteStamp:=loadRemoteGlobalStamp(This:C1470.name)
-	
 	//MARK: touch functions (private)
 	
 Function _touchLocalEntity($localEntity : 4D:C1709.Entity) : Object
@@ -310,7 +282,7 @@ Function _touchLocalEntity($localEntity : 4D:C1709.Entity) : Object
 		 || (Not:C34(OB Instance of:C1731($localEntity; 4D:C1709.Entity)))\
 		 || ($localEntity.__GlobalStamp=Null:C1517)
 		If (This:C1470.isThrowAvailable)
-			throw:C1805({componentSignature: "DCT"; errCode: 1; target: "the entity"; deferred: True:C214})
+			//:C1805({componentSignature: "DCT"; errCode: 1; target: "the entity"; deferred: True})
 		End if 
 		return 
 	End if 
@@ -329,7 +301,7 @@ Function _touchRemoteEntity($remoteEntity : 4D:C1709.Entity) : Object
 		 || (Not:C34(OB Instance of:C1731($remoteEntity; 4D:C1709.Entity)))\
 		 || ($remoteEntity.__GlobalStamp=Null:C1517)
 		If (This:C1470.isThrowAvailable)
-			throw:C1805({componentSignature: "DCT"; errCode: 1; target: "the entity"; deferred: True:C214})
+			//:C1805({componentSignature: "DCT"; errCode: 1; target: "the entity"; deferred: True})
 		End if 
 		return 
 	End if 
@@ -373,19 +345,11 @@ Function get ds() : 4D:C1709.DataStoreImplementation
 	
 	If (This:C1470._ds=Null:C1517)
 		If (This:C1470.isThrowAvailable)
-			throw:C1805({componentSignature: "DCT"; errCode: 2; deferred: True:C214})
+			//:C1805({componentSignature: "DCT"; errCode: 2; deferred: True})
 		End if 
 	End if 
 	
 	return This:C1470._ds
-	
-Function get localStamp() : Real
-	
-	return This:C1470._localStamp
-	
-Function get remoteStamp() : Real
-	
-	return This:C1470._remoteStamp
 	
 Function get name() : Text
 	
@@ -395,3 +359,10 @@ Function get version() : Text
 	
 	return [This:C1470._major; This:C1470._minor; This:C1470._patch].join(".")
 	
+Function get localStamp() : Real
+	
+	return loadLocalGlobalStamp(This:C1470.name)
+	
+Function get remoteStamp() : Real
+	
+	return loadRemoteGlobalStamp(This:C1470.name)
