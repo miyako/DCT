@@ -17,7 +17,11 @@ switch to [`20.x`](https://github.com/miyako/DCT/tree/20.x) branch for 4D 20 LTS
 ![version](https://img.shields.io/badge/20%20R3%2B-E23089)
 
 * [data change tracking](https://blog.4d.com/track-data-changes-in-your-database/)
- 
+
+ ![version](https://img.shields.io/badge/20%20R2%2B-E23089)
+
+* [throw](https://blog.4d.com/enhanced-error-management-in-4d-code/)
+
 ## dependencies.json
 
 ```json
