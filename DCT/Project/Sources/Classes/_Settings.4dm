@@ -10,11 +10,11 @@ Function _fileForDataStore($name : Text; $isRemote : Boolean; $extension : Text)
 	$folder:=This:C1470._folder
 	$folder.create()
 	
-	If ($isRemote)
-		$file:=$folder.file("remote-"+$name+$extension)
-	Else 
-		$file:=$folder.file("local"+$extension)
-	End if 
+	var $prefix : Text
+	$prefix:=$isRemote ? "remote" : "local"
+	
+	var $file : 4D:C1709.File
+	$file:=$folder.file($prefix+"-"+$name+$extension)
 	
 	return $file
 	

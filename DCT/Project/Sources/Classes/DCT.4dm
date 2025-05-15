@@ -14,9 +14,7 @@ property _minor : Integer
 property _patch : Integer
 property _name : Text
 property _ds : 4D:C1709.DataStoreImplementation
-property _isRemoteGlobalStampAvailable : Boolean
-property _localStamp : Real
-property _remoteStamp : Real
+//property _isRemoteGlobalStampAvailable : Boolean
 property _isThrowAvailable : Boolean
 property _isDataChangeTrackingEnabled : Boolean
 property _isDataChangeTrackingAvailable : Boolean
@@ -67,7 +65,7 @@ Function connect($connectionInfo : Object; $name : Text) : Boolean
 	End if 
 	
 	If ($ds#Null:C1517)
-		This:C1470._isRemoteGlobalStampAvailable:=(OB Instance of:C1731($ds.getRemoteGlobalStamp; 4D:C1709.Function))
+		//This._isRemoteGlobalStampAvailable:=(OB Instance of($ds.getRemoteGlobalStamp; 4D.Function))
 		This:C1470._ds:=$ds
 		This:C1470._name:=$name
 		return True:C214
@@ -76,8 +74,6 @@ Function connect($connectionInfo : Object; $name : Text) : Boolean
 	return False:C215
 	
 Function sync($dataClasses : Collection)
-	
-	This:C1470._updateStamps()
 	
 	//if none specified, sync all tables
 	If ($dataClasses=Null:C1517) || ($dataClasses.length=0)
@@ -90,13 +86,14 @@ the files are create locally, not on the server
 */
 	var $settings : cs:C1710._Settings
 	$settings:=cs:C1710._Settings.new()
+	
 	var $localLogFile; $remoteLogFile : 4D:C1709.FileHandle
 	$remoteLogFile:=$settings.openLogFileForDataStore(This:C1470.name; True:C214)
-	$localLogFile:=$settings.openLogFileForDataStore()
+	$localLogFile:=$settings.openLogFileForDataStore(This:C1470.name)
 	
 	var $localstamp; $remoteStamp : Real
-	$localstamp:=This:C1470.getLocalGlobalStamp()
-	$remoteStamp:=This:C1470.getRemoteGlobalStamp()
+	$localstamp:=This:C1470.localStamp
+	$remoteStamp:=This:C1470.remoteStamp
 	
 	var $ds : 4D:C1709.DataStoreImplementation
 	$ds:=This:C1470.ds
@@ -245,7 +242,7 @@ the files are create locally, not on the server
 		End case 
 	End for each 
 	
-	saveLocalGlobalStamp($localstamp)
+	saveLocalGlobalStamp($localstamp; This:C1470.name)
 	saveRemoteGlobalStamp($remoteStamp; This:C1470.name)
 	
 	$localLogFile:=Null:C1517
@@ -253,54 +250,25 @@ the files are create locally, not on the server
 	
 	//MARK: stamp functions (public)
 	
-Function getLocalGlobalStamp() : Real
+	//Function getLocalGlobalStamp() : Real
 	
-	If (This:C1470.isDataChangeTrackingAvailable)
-		//%W-550.2
-		return ds:C1482.getGlobalStamp()
-		//%W+550.2
-	End if 
+	//If (This.isDataChangeTrackingAvailable)
+	////%W-550.2
+	//return ds.getGlobalStamp()
+	////%W+550.2
+	//End if 
 	
-	return -1
+	//return -1
 	
-Function getRemoteGlobalStamp() : Real
+	//Function getRemoteGlobalStamp() : Real
 	
-	If (This:C1470.isRemoteGlobalStampAvailable)
-		//%W-550.2
-		return This:C1470.ds.getRemoteGlobalStamp()
-		//%W+550.2
-	End if 
+	//If (This.isRemoteGlobalStampAvailable)
+	////%W-550.2
+	//return This.ds.getRemoteGlobalStamp()
+	////%W+550.2
+	//End if 
 	
-	return -1
-	
-	//MARK: stamp functions (private)
-	
-Function _updateStamps()
-	
-	If (Not:C34(This:C1470.isDataChangeTrackingAvailable)) || (Not:C34(This:C1470.isDataChangeTrackingEnabled))
-		If (This:C1470.isThrowAvailable)
-			//:C1805({componentSignature: "DCT"; errCode: 1; target: "the database"; deferred: True})
-		End if 
-		return 
-	End if 
-	
-	This:C1470._localStamp:=This:C1470.getLocalGlobalStamp()
-	This:C1470._remoteStamp:=This:C1470.getRemoteGlobalStamp()
-	
-	var $localStamp; $remoteStamp : Real
-	$localStamp:=loadLocalGlobalStamp()
-	$remoteStamp:=loadRemoteGlobalStamp(This:C1470.name)
-	
-	If ($localStamp=-1) && (This:C1470.localStamp#0)
-		saveLocalGlobalStamp(This:C1470.localStamp-1)
-	End if 
-	
-	If ($remoteStamp=-1) && (This:C1470.remoteStamp#0)
-		saveRemoteGlobalStamp(This:C1470.remoteStamp-1; This:C1470.name)
-	End if 
-	
-	This:C1470._localStamp:=loadLocalGlobalStamp()
-	This:C1470._remoteStamp:=loadRemoteGlobalStamp(This:C1470.name)
+	//return -1
 	
 	//MARK: touch functions (private)
 	
@@ -361,9 +329,9 @@ Function get isThrowAvailable() : Boolean
 	
 	return This:C1470._isThrowAvailable
 	
-Function get isRemoteGlobalStampAvailable() : Boolean
+	//Function get isRemoteGlobalStampAvailable() : Boolean
 	
-	return This:C1470._isRemoteGlobalStampAvailable
+	//return This._isRemoteGlobalStampAvailable
 	
 Function get dataClasses() : Collection
 	
@@ -379,14 +347,6 @@ Function get ds() : 4D:C1709.DataStoreImplementation
 	
 	return This:C1470._ds
 	
-Function get localStamp() : Real
-	
-	return This:C1470._localStamp
-	
-Function get remoteStamp() : Real
-	
-	return This:C1470._remoteStamp
-	
 Function get name() : Text
 	
 	return This:C1470._name
@@ -395,3 +355,10 @@ Function get version() : Text
 	
 	return [This:C1470._major; This:C1470._minor; This:C1470._patch].join(".")
 	
+Function get localStamp() : Real
+	
+	return loadLocalGlobalStamp(This:C1470.name)
+	
+Function get remoteStamp() : Real
+	
+	return loadRemoteGlobalStamp(This:C1470.name)
