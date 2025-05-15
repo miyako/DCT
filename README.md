@@ -6,18 +6,6 @@
 # DCT
 Data Change Tracking
 
-switch to [`20.x`](https://github.com/miyako/DCT/tree/20.x) branch for 4D 20 LTS compatible version.
-
-### Compatibility
-
-![version](https://img.shields.io/badge/20%20R4%2B-E23089)
-
-* [try](https://blog.4d.com/a-new-way-to-handle-errors/)
-
-![version](https://img.shields.io/badge/20%20R3%2B-E23089)
-
-* [data change tracking](https://blog.4d.com/track-data-changes-in-your-database/)
- 
 ## dependencies.json
 
 ```json
