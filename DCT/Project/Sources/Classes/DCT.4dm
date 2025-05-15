@@ -154,7 +154,7 @@ the files are create locally, not on the server
 							$remoteEntity:=$remoteDataClass.new()
 						End if 
 						For each ($attributeName; $localEntity)
-							If ($dataClassName#"__GlobalStamp") && ($localDataClass[$attributeName].kind="storage") && ($attributeName#"__GlobalStamp")
+							If ($localDataClass[$attributeName].kind="storage") && ($attributeName#"__GlobalStamp")
 								$remoteEntity[$attributeName]:=$localEntity[$attributeName]
 							End if 
 						End for each 
@@ -223,7 +223,7 @@ the files are create locally, not on the server
 						$localEntity:=$localDataClass.new()
 					End if 
 					For each ($attributeName; $remoteEntity)
-						If ($dataClassName#"__GlobalStamp") && ($localDataClass[$attributeName].kind="storage") && ($attributeName#"__GlobalStamp")
+						If ($localDataClass[$attributeName].kind="storage") && ($attributeName#"__GlobalStamp")
 							$localEntity[$attributeName]:=$remoteEntity[$attributeName]
 						End if 
 					End for each 
