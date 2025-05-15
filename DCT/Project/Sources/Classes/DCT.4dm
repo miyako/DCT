@@ -14,7 +14,7 @@ property _minor : Integer
 property _patch : Integer
 property _name : Text
 property _ds : 4D:C1709.DataStoreImplementation
-//property _isRemoteGlobalStampAvailable : Boolean
+property _isRemoteGlobalStampAvailable : Boolean
 property _isThrowAvailable : Boolean
 property _isDataChangeTrackingEnabled : Boolean
 property _isDataChangeTrackingAvailable : Boolean
@@ -65,7 +65,7 @@ Function connect($connectionInfo : Object; $name : Text) : Boolean
 	End if 
 	
 	If ($ds#Null:C1517)
-		//This._isRemoteGlobalStampAvailable:=(OB Instance of($ds.getRemoteGlobalStamp; 4D.Function))
+		This:C1470._isRemoteGlobalStampAvailable:=(OB Instance of:C1731($ds.getRemoteGlobalStamp; 4D:C1709.Function))
 		This:C1470._ds:=$ds
 		This:C1470._name:=$name
 		return True:C214
@@ -74,6 +74,14 @@ Function connect($connectionInfo : Object; $name : Text) : Boolean
 	return False:C215
 	
 Function sync($dataClasses : Collection)
+	
+	var $nextLocalStamp; $nextRemoteStamp : Real
+	$nextLocalStamp:=This:C1470.getLocalGlobalStamp()
+	$nextRemoteStamp:=This:C1470.getRemoteGlobalStamp()
+	
+	var $localStamp; $remoteStamp : Real
+	$localStamp:=This:C1470.localStamp
+	$remoteStamp:=This:C1470.remoteStamp
 	
 	//if none specified, sync all tables
 	If ($dataClasses=Null:C1517) || ($dataClasses.length=0)
@@ -90,10 +98,6 @@ the files are create locally, not on the server
 	var $localLogFile; $remoteLogFile : 4D:C1709.FileHandle
 	$remoteLogFile:=$settings.openLogFileForDataStore(This:C1470.name; True:C214)
 	$localLogFile:=$settings.openLogFileForDataStore(This:C1470.name)
-	
-	var $localstamp; $remoteStamp : Real
-	$localstamp:=This:C1470.localStamp
-	$remoteStamp:=This:C1470.remoteStamp
 	
 	var $ds : 4D:C1709.DataStoreImplementation
 	$ds:=This:C1470.ds
@@ -128,7 +132,7 @@ the files are create locally, not on the server
 			
 			Case of 
 				: ($dataClassName="__DeletedRecords")
-					$entitySelection:=ds:C1482["__DeletedRecords"].query("__Stamp >= :1"; This:C1470.localStamp)
+					$entitySelection:=ds:C1482["__DeletedRecords"].query("__Stamp >= :1"; $localStamp)
 					For each ($localEntity; $entitySelection)
 						$remoteEntity:=$ds[$localEntity.__TableName].get($localEntity.__PrimaryKey)
 						If ($remoteEntity#Null:C1517)
@@ -143,7 +147,7 @@ the files are create locally, not on the server
 						End if 
 					End for each 
 				Else 
-					$entitySelection:=$localDataClass.query("__GlobalStamp >= :1"; This:C1470.localStamp)
+					$entitySelection:=$localDataClass.query("__GlobalStamp >= :1"; $localStamp)
 					For each ($localEntity; $entitySelection)
 						$remoteEntity:=$remoteDataClass.get($localEntity.getKey())
 						If ($remoteEntity=Null:C1517)
@@ -165,7 +169,7 @@ the files are create locally, not on the server
 							
 							//increment the stamp to avoid the operation bouncing back
 							If ($remoteEntity.__GlobalStamp#Null:C1517)
-								$remotestamp:=$remoteEntity.__GlobalStamp+1
+								$nextRemoteStamp:=$remoteEntity.__GlobalStamp+1
 							End if 
 							
 						End if 
@@ -197,7 +201,7 @@ the files are create locally, not on the server
 		
 		Case of 
 			: ($dataClassName="__DeletedRecords")
-				$entitySelection:=$ds.__DeletedRecords.query("__Stamp >= :1"; This:C1470.remoteStamp)
+				$entitySelection:=$ds.__DeletedRecords.query("__Stamp >= :1"; $remoteStamp)
 				For each ($remoteEntity; $entitySelection)
 					$localEntity:=ds:C1482[$remoteEntity.__TableName].get($remoteEntity.__PrimaryKey)
 					If ($localEntity#Null:C1517)
@@ -212,7 +216,7 @@ the files are create locally, not on the server
 					End if 
 				End for each 
 			Else 
-				$entitySelection:=$remoteDataClass.query("__GlobalStamp >= :1"; This:C1470.remoteStamp)
+				$entitySelection:=$remoteDataClass.query("__GlobalStamp >= :1"; $remoteStamp)
 				For each ($remoteEntity; $entitySelection)
 					$localEntity:=$localDataClass.get($remoteEntity.getKey())
 					If ($localEntity=Null:C1517)
@@ -234,7 +238,7 @@ the files are create locally, not on the server
 						
 						//increment the stamp to avoid the operation bouncing back
 						If ($localEntity.__GlobalStamp#Null:C1517)
-							$localstamp:=$localEntity.__GlobalStamp+1
+							$nextLocalStamp:=$localEntity.__GlobalStamp+1
 						End if 
 						
 					End if 
@@ -242,33 +246,33 @@ the files are create locally, not on the server
 		End case 
 	End for each 
 	
-	saveLocalGlobalStamp($localstamp; This:C1470.name)
-	saveRemoteGlobalStamp($remoteStamp; This:C1470.name)
+	saveLocalGlobalStamp($nextLocalStamp; This:C1470.name)
+	saveRemoteGlobalStamp($nextRemoteStamp; This:C1470.name)
 	
 	$localLogFile:=Null:C1517
 	$remoteLogFile:=Null:C1517
 	
 	//MARK: stamp functions (public)
 	
-	//Function getLocalGlobalStamp() : Real
+Function getLocalGlobalStamp() : Real
 	
-	//If (This.isDataChangeTrackingAvailable)
-	////%W-550.2
-	//return ds.getGlobalStamp()
-	////%W+550.2
-	//End if 
+	If (This:C1470.isDataChangeTrackingAvailable)
+		//%W-550.2
+		return ds:C1482.getGlobalStamp()
+		//%W+550.2
+	End if 
 	
-	//return -1
+	return -1
 	
-	//Function getRemoteGlobalStamp() : Real
+Function getRemoteGlobalStamp() : Real
 	
-	//If (This.isRemoteGlobalStampAvailable)
-	////%W-550.2
-	//return This.ds.getRemoteGlobalStamp()
-	////%W+550.2
-	//End if 
+	If (This:C1470.isRemoteGlobalStampAvailable)
+		//%W-550.2
+		return This:C1470.ds.getRemoteGlobalStamp()
+		//%W+550.2
+	End if 
 	
-	//return -1
+	return -1
 	
 	//MARK: touch functions (private)
 	
@@ -329,9 +333,9 @@ Function get isThrowAvailable() : Boolean
 	
 	return This:C1470._isThrowAvailable
 	
-	//Function get isRemoteGlobalStampAvailable() : Boolean
+Function get isRemoteGlobalStampAvailable() : Boolean
 	
-	//return This._isRemoteGlobalStampAvailable
+	return This:C1470._isRemoteGlobalStampAvailable
 	
 Function get dataClasses() : Collection
 	
