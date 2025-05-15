@@ -159,7 +159,7 @@ the files are create locally, not on the server
 						End for each 
 						$status:=$remoteEntity.save(dk auto merge:K85:24)
 						If (Not:C34($status.success))
-							If ($remoteLogFile)
+							If ($remoteLogFile#Null:C1517)
 								$remoteLogFile.writeLine(JSON Stringify:C1217($status; *))
 								$remoteLogFile.writeLine(JSON Stringify:C1217($localEntity.toObject(); *))
 							End if 
