@@ -117,7 +117,7 @@ the files are create locally, not on the server
 			$remoteDataClass:=$ds[$dataClassName]
 			If (Not:C34(OB Instance of:C1731($remoteDataClass; 4D:C1709.DataClass)))
 				If (This:C1470.isThrowAvailable)
-					//:C1805({componentSignature: "DCT"; errCode: 3; target: "remote dataclass"; name: $dataClassName; deferred: True})
+					throw:C1805({componentSignature: "DCT"; errCode: 3; target: "remote dataclass"; name: $dataClassName; deferred: True:C214})
 				End if 
 				continue
 			End if 
@@ -125,7 +125,7 @@ the files are create locally, not on the server
 			$localDataClass:=ds:C1482[$dataClassName]
 			If (Not:C34(OB Instance of:C1731($localDataClass; 4D:C1709.DataClass)))
 				If (This:C1470.isThrowAvailable)
-					//:C1805({componentSignature: "DCT"; errCode: 3; target: "local dataclass"; name: $dataClassName; deferred: True})
+					throw:C1805({componentSignature: "DCT"; errCode: 3; target: "local dataclass"; name: $dataClassName; deferred: True:C214})
 				End if 
 				continue
 			End if 
@@ -186,7 +186,7 @@ the files are create locally, not on the server
 		$remoteDataClass:=$ds[$dataClassName]
 		If (Not:C34(OB Instance of:C1731($remoteDataClass; 4D:C1709.DataClass)))
 			If (This:C1470.isThrowAvailable)
-				//:C1805({componentSignature: "DCT"; errCode: 3; target: "remote dataclass"; name: $dataClassName; deferred: True})
+				throw:C1805({componentSignature: "DCT"; errCode: 3; target: "remote dataclass"; name: $dataClassName; deferred: True:C214})
 			End if 
 			continue
 		End if 
@@ -194,7 +194,7 @@ the files are create locally, not on the server
 		$localDataClass:=ds:C1482[$dataClassName]
 		If (Not:C34(OB Instance of:C1731($localDataClass; 4D:C1709.DataClass)))
 			If (This:C1470.isThrowAvailable)
-				//:C1805({componentSignature: "DCT"; errCode: 3; target: "local dataclass"; name: $dataClassName; deferred: True})
+				throw:C1805({componentSignature: "DCT"; errCode: 3; target: "local dataclass"; name: $dataClassName; deferred: True:C214})
 			End if 
 			continue
 		End if 
@@ -282,7 +282,7 @@ Function _touchLocalEntity($localEntity : 4D:C1709.Entity) : Object
 		 || (Not:C34(OB Instance of:C1731($localEntity; 4D:C1709.Entity)))\
 		 || ($localEntity.__GlobalStamp=Null:C1517)
 		If (This:C1470.isThrowAvailable)
-			//:C1805({componentSignature: "DCT"; errCode: 1; target: "the entity"; deferred: True})
+			throw:C1805({componentSignature: "DCT"; errCode: 1; target: "the entity"; deferred: True:C214})
 		End if 
 		return 
 	End if 
@@ -301,7 +301,7 @@ Function _touchRemoteEntity($remoteEntity : 4D:C1709.Entity) : Object
 		 || (Not:C34(OB Instance of:C1731($remoteEntity; 4D:C1709.Entity)))\
 		 || ($remoteEntity.__GlobalStamp=Null:C1517)
 		If (This:C1470.isThrowAvailable)
-			//:C1805({componentSignature: "DCT"; errCode: 1; target: "the entity"; deferred: True})
+			throw:C1805({componentSignature: "DCT"; errCode: 1; target: "the entity"; deferred: True:C214})
 		End if 
 		return 
 	End if 
@@ -345,7 +345,7 @@ Function get ds() : 4D:C1709.DataStoreImplementation
 	
 	If (This:C1470._ds=Null:C1517)
 		If (This:C1470.isThrowAvailable)
-			//:C1805({componentSignature: "DCT"; errCode: 2; deferred: True})
+			throw:C1805({componentSignature: "DCT"; errCode: 2; deferred: True:C214})
 		End if 
 	End if 
 	
