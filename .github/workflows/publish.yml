@@ -15,6 +15,7 @@ on:
           type: choice
           description: semantic versioning
           options: 
+          - none
           - patch
           - minor 
           - major
