@@ -6,11 +6,11 @@
   ],
   "license": "MIT",
   "repository": "https://github.com/miyako/DCT",
-  "version": "20R4.35",
+  "version": "21.0.0",
   "tool": {
     "platform": "macos",
     "branch": "20%20Rx",
-    "version": "20%20R8",
+    "version": "20%20R10",
     "build": "latest",
     "arch": "arm"
   }
